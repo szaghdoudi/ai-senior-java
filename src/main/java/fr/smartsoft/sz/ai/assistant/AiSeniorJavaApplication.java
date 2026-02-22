@@ -1,4 +1,4 @@
-package fr.smartsoft.sz.ai.aiseniorjava;
+package fr.smartsoft.sz.ai.assistant;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
