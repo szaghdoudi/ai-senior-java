@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: ai-senior-java
+
+llm:
+  openai:
+    api:
+      key: sk-xxxxx
+    model: gpt-4o-mini
+  ollama:
+    base-url: http://localhost:11434
+    model: llama3.2

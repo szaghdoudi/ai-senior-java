@@ -16,4 +16,9 @@
 ## 2026-02-22
 - Implemented /api/ai/ask API contract (MVP mock)
 - Added requestId + meta fields + error handler
-  Next: add LlmClient interface + OpenAI-compatible provider call
+
+- Switched LLM integration to full reactive (no block)
+- Added LlmResult(provider/model/content) and real llm timings
+- Updated system prompt with glossary ADR
+  
+- Next: add structured audit logging per requestId (without storing sensitive content)
