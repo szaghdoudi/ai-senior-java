@@ -1,21 +1,28 @@
 # Roadmap
 
-## Phase 1 — Foundations (1-2 weeks)
+## Status snapshot (2026-03-05)
+- Phase 1: completed
+- Phase 2: in progress
+- Phase 3: planned
+- Phase 4: planned
+
+## Phase 1 — Foundations (completed)
 - Project skeleton + doc structure
-- Minimal AI endpoint design (no code until architecture is clear)
-- Choose providers strategy (OpenAI-compatible now, swappable later)
+- Initial API contract and architecture baseline
+- Provider strategy defined (pluggable via `LlmClient`)
 
-## Phase 2 — RAG MVP (2-4 weeks)
+## Phase 2 — RAG MVP (in progress)
+- Prompt injection protection
 - Document ingestion (Confluence/PDF/MD)
-- Embeddings + vector store
-- Ask endpoint with context injection + citations
+- Embeddings + vector store (ADR: pgvector first)
+- Ask endpoint with retrieval + citations
 
-## Phase 3 — Production hardening (4-8 weeks)
-- Audit logs (prompt, docs used, model version)
+## Phase 3 — Production hardening (planned)
+- Audit logs (request traceability + model/provider metadata)
 - Cost guardrails (token budgets, caching)
-- Security (PII redaction, allowlist, secrets management)
-- Monitoring + runbooks
+- Security hardening (PII redaction tuning, allowlist, secrets management)
+- Monitoring + runbooks + tracing
 
-## Phase 4 — Career packaging
+## Phase 4 — Career packaging (planned)
 - Interview story + architecture diagrams
 - CV bullet points + demo script

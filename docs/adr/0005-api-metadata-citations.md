@@ -3,16 +3,18 @@
 ## Status
 ACCEPTED
 
+## Date
+2026-03-05 (normalized; original decision predates this edit)
+
 ## Context
-Enterprise AI must be auditable and explainable.
-Users and auditors need to know what sources influenced an answer.
+Enterprise AI must be auditable and explainable. Users and auditors need to know which sources influenced an answer.
 
 ## Decision
 Every answer response includes:
 - `requestId` (traceability)
 - `citations` (doc/chunk references + relevance score)
-- `model/provider`
-- timings and cost fields (even if initially 0)
+- `model` and `provider`
+- timing and cost fields (even if initially zero)
 
 ## Consequences
 - Stronger compliance posture

@@ -7,7 +7,8 @@ Scope: LLM integration + RAG + audit + cost control + security-by-design.
 - Vision: [VISION.md](VISION.md)
 - Roadmap: [ROADMAP.md](ROADMAP.md)
 - Journal (work log): [JOURNAL.md](JOURNAL.md)
-- Architecture: [docs/architecture/system-design.md](docs/architecture/system-design.md)
+- Architecture: [docs/architecture/architecture.md](docs/architecture/architecture.md)
+- API contract: [docs/api/api-contract.md](docs/api/api-contract.md)
 - ADRs: [docs/adr](docs/adr)
 - Runbooks: [docs/runbooks](docs/runbooks)
 

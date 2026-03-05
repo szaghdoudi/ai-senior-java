@@ -39,7 +39,8 @@ Options (to decide later via ADR):
 ### 5) LLM Provider
 Start:
 - OpenAI-compatible API
-  Later:
+
+Later:
 - Azure OpenAI (typical in banks)
 - local model (Mistral/Llama) depending on constraints
 
@@ -86,26 +87,4 @@ flowchart LR
   R --> V[(Vector DB)]
   A --> L[LLM Provider]
   A --> O[Observability\nLogs/Metrics/Audit]
-
-
----
-
-## 3) (Option expert) Ajoute un “System Policy” de banque dès maintenant
-
-Crée :
-
-```text
-docs/architecture/system-policy.md
-
-# System Policy (Bank/Insurance style)
-
-The assistant must:
-- never output secrets or credentials
-- avoid personal data and suggest redaction if present
-- be explicit when uncertain
-- provide sources/citations when RAG is enabled
-- answer concisely and propose next steps
-
-If a request includes sensitive info:
-- refuse or ask to sanitize
-- log the refusal (without storing the sensitive content)
+```
