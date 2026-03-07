@@ -40,3 +40,19 @@
   - stabilize request correlation approach (MDC vs structured audit fields vs Reactor context)
   - implement prompt injection guard (policy enforcement / prompt firewall)
   - start RAG MVP (vector store + citations) aligned with ADRs
+
+## 2026-03-07
+- Added PromptSafetyService (prompt injection guard before LLM call)
+- Added SecurityBlockedException and mapped to API error code `SECURITY_BLOCKED`.
+- Update error handling to return consistent error payload with `requestId`.
+
+Why
+- Block prompt-injection patterns early to reduce security risk before provider call.
+
+Impact
+- Security: suspicious prompts can be blocked before `LlmClient.ask`.
+- API: blocked requests return `SECURITY_BLOCKED`.
+- Audit: blocked events are traceable via `requestId`.
+
+Next
+- Start RAG MVP scaffold (`RetrievalSErvice` contract + citations flow)

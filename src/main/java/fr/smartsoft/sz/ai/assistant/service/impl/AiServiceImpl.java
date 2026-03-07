@@ -7,7 +7,9 @@ import fr.smartsoft.sz.ai.assistant.dto.AiAskRequest;
 import fr.smartsoft.sz.ai.assistant.dto.AiAskResponse;
 import fr.smartsoft.sz.ai.assistant.llm.LlmClient;
 import fr.smartsoft.sz.ai.assistant.llm.dto.ResolvedOptions;
+import fr.smartsoft.sz.ai.assistant.security.PromptSafetyService;
 import fr.smartsoft.sz.ai.assistant.security.Redactor;
+import fr.smartsoft.sz.ai.assistant.security.SecurityBlockedException;
 import fr.smartsoft.sz.ai.assistant.service.AiService;
 import fr.smartsoft.sz.ai.assistant.service.OptionsResolver;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +30,14 @@ public class AiServiceImpl implements AiService {
     private final Redactor redactor;
     private final OptionsResolver optionsResolver;
     private final AuditLogger auditLogger;
+    private final PromptSafetyService promptSafetyService;
 
-    public AiServiceImpl(@Qualifier("OllamaLlmClient") LlmClient llmClient, Redactor redactor, OptionsResolver optionsResolver, AuditLogger auditLogger) {
+    public AiServiceImpl(@Qualifier("OllamaLlmClient") LlmClient llmClient, Redactor redactor, OptionsResolver optionsResolver, AuditLogger auditLogger, PromptSafetyService promptSafetyService) {
         this.llmClient = llmClient;
         this.redactor = redactor;
         this.optionsResolver = optionsResolver;
         this.auditLogger = auditLogger;
+        this.promptSafetyService = promptSafetyService;
     }
 
     public Mono<AiAskResponse> ask(AiAskRequest req) {
@@ -54,6 +58,20 @@ public class AiServiceImpl implements AiService {
                     int qLen = safeQuestion.length();
 
                     ResolvedOptions opts = optionsResolver.resolve(req);
+
+
+                    try{
+                        promptSafetyService.ensureSafe(question);
+                    } catch (SecurityBlockedException e) {
+                        auditLogger.info("ai.ask.start", Map.of(
+                                "requestId", requestId,
+                                "qLen", safeQuestion.length(),
+                                "ragRequested", opts.ragUsed(),
+                                "topKRequested", opts.topK()
+                        ));
+
+                    }
+
 
                     boolean ragUsed = req.options() != null && Boolean.TRUE.equals(req.options().useRag());
                     int topK = req.options() != null && req.options().topK() != null ? req.options().topK() : 5;
