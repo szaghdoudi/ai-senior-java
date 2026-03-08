@@ -56,3 +56,29 @@ Impact
 
 Next
 - Start RAG MVP scaffold (`RetrievalSErvice` contract + citations flow)
+
+## 2026-03-08
+
+- Started RAG MVP implementation with a clean contract-first approach
+  - added `RetrievalQuery`, `RetrievedChunk`, `SourceType`, `RetrievalService`
+  - added `InMemoryRetrievalService` as first adapter
+- Integrated retrieval flow into `AiServiceImpl`
+  - when use `useRag=true`, retrieve topK chunks and inject context into prompt
+  - map retrieved chunks to API `citations[]`
+- Fixed security flow correctness:
+  - prompt-safety block now return error (`Mono.error`) instead of only logging
+- Added/updated tests:
+  - retrieval unit test for ranking/topK behavior
+  - Controller RAG integration test validates `meta.ragUsed`, `topK` and non-empty citations
+- Stabilized tests for CI/sabdbox
+  - switched controller integration test to `WebEnvironment.MOCK`
+  - externalized reusable test config `StubLlmConfig`
+  - stubbed LLM bean with qualifier-compatible name (`OllamaLllmCLient`) to avoid real calls
+
+Why
+- Validate end-to-end RAG orchestration before introducing pgvector complexity 
+- Keep tests deterministic, fast and independent of external LLM/network
+
+Next
+- Introduce `VectorStore` port and `EmbeddingProvider` port.
+- Keep `RetrievalService` orchestration stable with replacing in-memory adapter with pgvector adapter

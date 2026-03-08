@@ -7,6 +7,9 @@ import fr.smartsoft.sz.ai.assistant.dto.AiAskRequest;
 import fr.smartsoft.sz.ai.assistant.dto.AiAskResponse;
 import fr.smartsoft.sz.ai.assistant.llm.LlmClient;
 import fr.smartsoft.sz.ai.assistant.llm.dto.ResolvedOptions;
+import fr.smartsoft.sz.ai.assistant.rag.RetrievalQuery;
+import fr.smartsoft.sz.ai.assistant.rag.RetrievalService;
+import fr.smartsoft.sz.ai.assistant.rag.RetrievedChunk;
 import fr.smartsoft.sz.ai.assistant.security.PromptSafetyService;
 import fr.smartsoft.sz.ai.assistant.security.Redactor;
 import fr.smartsoft.sz.ai.assistant.security.SecurityBlockedException;
@@ -20,6 +23,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -31,13 +35,15 @@ public class AiServiceImpl implements AiService {
     private final OptionsResolver optionsResolver;
     private final AuditLogger auditLogger;
     private final PromptSafetyService promptSafetyService;
+    private final RetrievalService retrievalService;
 
-    public AiServiceImpl(@Qualifier("OllamaLlmClient") LlmClient llmClient, Redactor redactor, OptionsResolver optionsResolver, AuditLogger auditLogger, PromptSafetyService promptSafetyService) {
+    public AiServiceImpl(@Qualifier("OllamaLlmClient") LlmClient llmClient, Redactor redactor, OptionsResolver optionsResolver, AuditLogger auditLogger, PromptSafetyService promptSafetyService, RetrievalService retrievalService) {
         this.llmClient = llmClient;
         this.redactor = redactor;
         this.optionsResolver = optionsResolver;
         this.auditLogger = auditLogger;
         this.promptSafetyService = promptSafetyService;
+        this.retrievalService = retrievalService;
     }
 
     public Mono<AiAskResponse> ask(AiAskRequest req) {
@@ -60,7 +66,7 @@ public class AiServiceImpl implements AiService {
                     ResolvedOptions opts = optionsResolver.resolve(req);
 
 
-                    try{
+                    try {
                         promptSafetyService.ensureSafe(question);
                     } catch (SecurityBlockedException e) {
                         auditLogger.info("ai.ask.start", Map.of(
@@ -69,7 +75,7 @@ public class AiServiceImpl implements AiService {
                                 "ragRequested", opts.ragUsed(),
                                 "topKRequested", opts.topK()
                         ));
-
+                        return Mono.error(e);
                     }
 
 
@@ -83,34 +89,75 @@ public class AiServiceImpl implements AiService {
                             "topKRequested", topK
                     ));
 
-                    long llmStart = System.currentTimeMillis();
-                    return llmClient.ask(safeQuestion)
-                            .map(llm -> {
-                                long llmMs = System.currentTimeMillis() - llmStart;
-                                long total = System.currentTimeMillis() - t0;
-                                // Audit END (toujours sans contenu)
-                                auditLogger.info("ai.ask.end", Map.of(
-                                        "requestId", requestId,
-                                        "provider", llm.provider(),
-                                        "model", llm.model(),
-                                        "llmMs", llmMs,
-                                        "totalMs", total
-                                ));
+                    Mono<List<RetrievedChunk>> retrievedMono = opts.ragUsed()
+                            ? retrievalService.retrieve(new RetrievalQuery(safeQuestion, opts.topK()))
+                            : Mono.just(List.of());
+                    return retrievedMono.flatMap(chunks -> {
+                        String prompt = buildPrompt(safeQuestion, chunks);
 
-                                return new AiAskResponse(
-                                        llm.content(),
-                                        List.of(), // no RAG yet
-                                        new AiAskResponse.Meta(
-                                                requestId,
-                                                llm.model(),
-                                                llm.provider(),
-                                                ragUsed,
-                                                new AiAskResponse.Meta.Retrieval(topK),
-                                                Map.of("retrieval", 0L, "llm", llmMs, "total", total),
-                                                new AiAskResponse.Meta.Cost(0, 0, 0, 0.0)
-                                        )
-                                );
-                            });
+                        long llmStart = System.currentTimeMillis();
+                        return llmClient.ask(prompt)
+                                .map(llm -> {
+                                    long llmMs = System.currentTimeMillis() - llmStart;
+                                    long total = System.currentTimeMillis() - t0;
+                                    // Audit END (toujours sans contenu)
+                                    auditLogger.info("ai.ask.end", Map.of(
+                                            "requestId", requestId,
+                                            "provider", llm.provider(),
+                                            "model", llm.model(),
+                                            "llmMs", llmMs,
+                                            "totalMs", total
+                                    ));
+
+                                    List<AiAskResponse.Citation> citations = chunks.stream()
+                                            .map(c -> new AiAskResponse.Citation(
+                                                    c.docId(),
+                                                    c.docTitle(),
+                                                    c.chunkId(),
+                                                    c.score(),
+                                                    AiAskResponse.SourceType.valueOf(c.sourceType().name()),
+                                                    c.sourceUrl()
+                                            ))
+                                            .collect(Collectors.toList());
+
+                                    return new AiAskResponse(
+                                            llm.content(),
+                                            citations,
+                                            new AiAskResponse.Meta(
+                                                    requestId,
+                                                    llm.model(),
+                                                    llm.provider(),
+                                                    ragUsed,
+                                                    new AiAskResponse.Meta.Retrieval(topK),
+                                                    Map.of("retrieval", 0L, "llm", llmMs, "total", total),
+                                                    new AiAskResponse.Meta.Cost(0, 0, 0, 0.0)
+                                            )
+                                    );
+                                });
+                    });
                 });
+    }
+
+    private static String buildPrompt(String question, List<RetrievedChunk> chunks) {
+        if (chunks.isEmpty()) {
+            return question;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Use the following internal context to answer the question.\n");
+        sb.append("If context is insufficient, say so explicitly.\n\n");
+        sb.append("Context:\n");
+
+        for (RetrievedChunk c : chunks) {
+            sb.append("- [docId=").append(c.docId())
+                    .append(", chunkId=").append(c.chunkId())
+                    .append(", score=").append(String.format("%.3f", c.score()))
+                    .append("] ")
+                    .append(c.content())
+                    .append("\n");
+        }
+
+        sb.append("\nQuestion:\n").append(question);
+        return sb.toString();
     }
 }
