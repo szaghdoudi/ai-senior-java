@@ -13,7 +13,7 @@
 
 ## Phase 2 — RAG MVP (in progress)
 - Prompt injection protection
-- Document ingestion (Confluence/PDF/MD)
+- Document ingestion (pending)
 - Embeddings + vector store (ADR: pgvector first)
 - Ask endpoint with retrieval + citations
 

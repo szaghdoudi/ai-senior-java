@@ -1,0 +1,7 @@
+spring:
+  config:
+    activate:
+      on-profile: rag-pgvector
+
+rag:
+  vector-store: pgvector

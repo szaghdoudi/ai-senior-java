@@ -82,3 +82,26 @@ Why
 Next
 - Introduce `VectorStore` port and `EmbeddingProvider` port.
 - Keep `RetrievalService` orchestration stable with replacing in-memory adapter with pgvector adapter
+
+## 2026-03-13
+- Added PostgresSQL/pgvector infrastructure for the RAG path.
+- Added R2DBC runtime access and Flyway schema integration.
+- Added initial pgvector migration and validated Flyway execution.
+- `rag_chunks` table is now created successfully in PostgresSQL.
+- Retrieval flow is wired to the database through `PgVectorStore`.
+- Application starts and the RAG database path is exercised successfully.
+
+Why
+- Establish a clean production-oriented foundation for RAG before implementing ingestion.
+
+Current limitation
+- `rag_chunk` is still empty because ingestion has not been implemented yet.
+- Retrieval is technically connected, but functionality ineffective until documents are indexed.
+
+Next
+- Implement ingestion pipeline:
+  - load docs
+  - chunk content
+  - compute embeddings
+  - insert rows into `rag_chunks`
+  
