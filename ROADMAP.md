@@ -13,9 +13,9 @@
 
 ## Phase 2 — RAG MVP (in progress)
 - Prompt injection protection
-- Document ingestion (pending)
-- Embeddings + vector store (ADR: pgvector first)
-- Ask endpoint with retrieval + citations
+- Document ingestion (implemented for local markdown docs)
+- Embeddings + vector store (pgvector integrated, current embeddings are placeholder-based)
+- Ask endpoint with retrieval + citations(operational end-to-end, relevance tuning pending real embeddings)
 
 ## Phase 3 — Production hardening (planned)
 - Audit logs (request traceability + model/provider metadata)

@@ -105,3 +105,21 @@ Next
   - compute embeddings
   - insert rows into `rag_chunks`
   
+## 2026-03-14
+
+- Completed the first end-to-end RAG ingestion flow.
+- Local markdown documents are now loaded, chunked, embedded and indexed into PostgreSQL/pgvector
+- Flyway migration was validated and `rag_chunks` is populated successfully.
+- The `/api/ai/ask` endpoint now return non-empty `citations[]` with `useRag=true`.
+- Retrieval path is operational from indexed data through `PgVectorStore`.
+
+Why 
+- Move from RAG infrastructure only to a functionally usable indexed knowledge base.
+
+Current limitation
+- Retrieval relevance is still weak because the current embedding provider is a placeholder implementation.
+- The system works structurally, but semantic quality is not yet production-grade.
+
+Next
+- Replace the placeholder embedding provider with a real embedding provider.
+- Re-validate retrieval quality after re-indexing documents.

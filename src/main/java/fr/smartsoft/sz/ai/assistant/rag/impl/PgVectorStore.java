@@ -3,6 +3,7 @@ package fr.smartsoft.sz.ai.assistant.rag.impl;
 import fr.smartsoft.sz.ai.assistant.rag.SourceType;
 import fr.smartsoft.sz.ai.assistant.rag.VectorSearchMatch;
 import fr.smartsoft.sz.ai.assistant.rag.VectorStore;
+import fr.smartsoft.sz.ai.assistant.rag.pgvector.PgVectorFormat;
 import org.springframework.context.annotation.Profile;
 import org.springframework.r2dbc.core.DatabaseClient;
 import org.springframework.stereotype.Component;
@@ -24,7 +25,7 @@ public class PgVectorStore implements VectorStore {
     @Override
     public Mono<List<VectorSearchMatch>> search(float[] queryEmbedding, int topK) {
         int safeTopK = Math.max(1, Math.min(topK, 10));
-        String embeddingLiteral = toPgVectorLiteral(queryEmbedding);
+        String embeddingLiteral = PgVectorFormat.toLiteral(queryEmbedding);
 
         String sql = """
                 SELECT
@@ -32,7 +33,7 @@ public class PgVectorStore implements VectorStore {
                     doc_title,
                     chunk_id,
                     content,
-                    source_type
+                    source_type,
                     source_url,
                     1 - (embedding <=> CAST(:embedding AS vector)) AS score
                 FROM rag_chunks
@@ -67,16 +68,4 @@ public class PgVectorStore implements VectorStore {
     }
 
 
-    private String toPgVectorLiteral(float[] vector) {
-        if (vector == null || vector.length == 0) {
-            throw new IllegalArgumentException("query embedding must not be empty");
-        }
-        StringBuilder sb = new StringBuilder("[");
-        for (int i = 0; i < vector.length; i++) {
-            if (i > 0) sb.append(',');
-            sb.append(String.format(Locale.ROOT, "%.8f", vector[i]));
-        }
-        sb.append("]");
-        return sb.toString();
-    }
 }
