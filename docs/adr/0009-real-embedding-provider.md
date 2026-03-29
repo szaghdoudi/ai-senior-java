@@ -10,9 +10,9 @@ PROPOSED
 The current RAG pipeline is operational end-to-end
 - documents are loaded and chunked
 - chunks are indexed into PostgreSQL/pgvector
-- retrieval return citations through the API
+- retrieval returns citations through the API
 
-However, the current embedding provider is a placeholder implementation is used only to validate pipeline wiring.
+However, the current embedding provider is a placeholder implementation used only to validate pipeline wiring.
 It does not produce semantically meaningful vectors, which limits retrieval quality and makes ranking unreliable.
 
 To move from structural validation to useful RAG behavior, the system now needs a real embedding provider.
@@ -40,5 +40,5 @@ Cons:
 ## Follow-up
 A concrete provider decision should be recorded once the actual implementation is selected:
 - OpenAI-compatible embedding API
-- Azure openAI embeddings
+- Azure OpenAI embeddings
 - Local embeddings service

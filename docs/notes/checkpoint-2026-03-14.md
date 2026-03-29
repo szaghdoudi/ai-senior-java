@@ -16,9 +16,9 @@ The first end-to-end RAG pipeline is now operational.
 
 ## Architectural status
 - Runtime database access uses R2DBC.
-- Schema migrations use Flyway with JDBC
+- Schema migrations use Flyway with JDBC.
 - Retrieval and ingestion are separated behind explicit ports and adapters.
-- The system is ready to accept real embedding provider without major refactoring.
+- The system is ready to accept a real embedding provider without major refactoring.
 
 ## Next priority
 Implement a real embedding provider and re-index documents to improve retrieval relevance.

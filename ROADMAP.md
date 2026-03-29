@@ -1,6 +1,6 @@
 # Roadmap
 
-## Status snapshot (2026-03-05)
+## Status snapshot (2026-03-14)
 - Phase 1: completed
 - Phase 2: in progress
 - Phase 3: planned
@@ -15,7 +15,7 @@
 - Prompt injection protection
 - Document ingestion (implemented for local markdown docs)
 - Embeddings + vector store (pgvector integrated, current embeddings are placeholder-based)
-- Ask endpoint with retrieval + citations(operational end-to-end, relevance tuning pending real embeddings)
+- Ask endpoint with retrieval + citations (operational end-to-end, relevance tuning pending real embeddings)
 
 ## Phase 3 — Production hardening (planned)
 - Audit logs (request traceability + model/provider metadata)

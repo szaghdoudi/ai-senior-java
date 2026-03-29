@@ -55,7 +55,7 @@ Impact
 - Audit: blocked events are traceable via `requestId`.
 
 Next
-- Start RAG MVP scaffold (`RetrievalSErvice` contract + citations flow)
+- Start RAG MVP scaffold (`RetrievalService` contract + citations flow)
 
 ## 2026-03-08
 
@@ -70,10 +70,10 @@ Next
 - Added/updated tests:
   - retrieval unit test for ranking/topK behavior
   - Controller RAG integration test validates `meta.ragUsed`, `topK` and non-empty citations
-- Stabilized tests for CI/sabdbox
+- Stabilized tests for CI/sandbox
   - switched controller integration test to `WebEnvironment.MOCK`
   - externalized reusable test config `StubLlmConfig`
-  - stubbed LLM bean with qualifier-compatible name (`OllamaLllmCLient`) to avoid real calls
+  - stubbed LLM bean with qualifier-compatible name (`OllamaLlmClient`) to avoid real calls
 
 Why
 - Validate end-to-end RAG orchestration before introducing pgvector complexity 
@@ -84,10 +84,10 @@ Next
 - Keep `RetrievalService` orchestration stable with replacing in-memory adapter with pgvector adapter
 
 ## 2026-03-13
-- Added PostgresSQL/pgvector infrastructure for the RAG path.
+- Added PostgreSQL/pgvector infrastructure for the RAG path.
 - Added R2DBC runtime access and Flyway schema integration.
 - Added initial pgvector migration and validated Flyway execution.
-- `rag_chunks` table is now created successfully in PostgresSQL.
+- `rag_chunks` table is now created successfully in PostgreSQL.
 - Retrieval flow is wired to the database through `PgVectorStore`.
 - Application starts and the RAG database path is exercised successfully.
 
@@ -95,7 +95,7 @@ Why
 - Establish a clean production-oriented foundation for RAG before implementing ingestion.
 
 Current limitation
-- `rag_chunk` is still empty because ingestion has not been implemented yet.
+- `rag_chunks` is still empty because ingestion has not been implemented yet.
 - Retrieval is technically connected, but functionality ineffective until documents are indexed.
 
 Next
@@ -110,7 +110,7 @@ Next
 - Completed the first end-to-end RAG ingestion flow.
 - Local markdown documents are now loaded, chunked, embedded and indexed into PostgreSQL/pgvector
 - Flyway migration was validated and `rag_chunks` is populated successfully.
-- The `/api/ai/ask` endpoint now return non-empty `citations[]` with `useRag=true`.
+- The `/api/ai/ask` endpoint now returns non-empty `citations[]` with `useRag=true`.
 - Retrieval path is operational from indexed data through `PgVectorStore`.
 
 Why 

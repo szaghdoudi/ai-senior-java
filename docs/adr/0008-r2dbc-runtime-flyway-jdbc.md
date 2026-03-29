@@ -19,7 +19,7 @@ Use:
 - R2DBC for runtime database access in the application
 - Flyway with JDBC for schema migration at startup
 
-The PostgreSQL drive setup therefore contains both:
+The PostgreSQL driver setup therefore contains both:
 - reactive PostgreSQL access for runtime queries
 - JDBC PostgreSQL access for Flyway migrations
 
@@ -33,12 +33,3 @@ Cons:
 - Required two database connectivity configurations
 - Slightly more setup complexity in application configuration
 - Developers must understand that runtime DB access and migration DB access use different stacks
-
-## Consequences
-List expected impacts and tradeoffs.
-
-Pros:
-- ...
-
-Cons:
-- ...

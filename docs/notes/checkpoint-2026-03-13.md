@@ -4,7 +4,7 @@
 The RAG infrastructure is now connected to PostgreSQL/pgvector and Flyway migrations are operational.
 
 ## What is working
-- PostgresSQL container is available fro local development.
+- PostgreSQL container is available for local development.
 - Flyway runs successfully at application startup.
 - `rag_chunks` schema is created in PostgreSQL.
 - Runtime retrieval path is connected through R2DBC and `PgVectorStore`.
@@ -17,7 +17,7 @@ The RAG infrastructure is now connected to PostgreSQL/pgvector and Flyway migrat
 
 ## Architectural status
 - Runtime DB access uses R2DBC.
-- Schema migration use Flyway with JDBC.
+- Schema migrations use Flyway with JDBC.
 - Retrieval contracts and vector-store abstraction remain in place.
 
 ## Next priority
