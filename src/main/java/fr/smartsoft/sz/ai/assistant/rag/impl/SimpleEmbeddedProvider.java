@@ -2,10 +2,12 @@ package fr.smartsoft.sz.ai.assistant.rag.impl;
 
 import fr.smartsoft.sz.ai.assistant.rag.EmbeddingProvider;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 @Component
+@Profile("!real-embeddings")
 public class SimpleEmbeddedProvider implements EmbeddingProvider {
 
     private final int dimension;
