@@ -7,6 +7,7 @@ import fr.smartsoft.sz.ai.assistant.dto.AiAskRequest;
 import fr.smartsoft.sz.ai.assistant.dto.AiAskResponse;
 import fr.smartsoft.sz.ai.assistant.llm.LlmClient;
 import fr.smartsoft.sz.ai.assistant.llm.dto.ResolvedOptions;
+import fr.smartsoft.sz.ai.assistant.rag.PromptBuilder;
 import fr.smartsoft.sz.ai.assistant.rag.RetrievalQuery;
 import fr.smartsoft.sz.ai.assistant.rag.RetrievalService;
 import fr.smartsoft.sz.ai.assistant.rag.RetrievedChunk;
@@ -36,14 +37,16 @@ public class AiServiceImpl implements AiService {
     private final AuditLogger auditLogger;
     private final PromptSafetyService promptSafetyService;
     private final RetrievalService retrievalService;
+    private final PromptBuilder promptBuilder;
 
-    public AiServiceImpl(@Qualifier("OllamaLlmClient") LlmClient llmClient, Redactor redactor, OptionsResolver optionsResolver, AuditLogger auditLogger, PromptSafetyService promptSafetyService, RetrievalService retrievalService) {
+    public AiServiceImpl(@Qualifier("OllamaLlmClient") LlmClient llmClient, Redactor redactor, OptionsResolver optionsResolver, AuditLogger auditLogger, PromptSafetyService promptSafetyService, RetrievalService retrievalService, PromptBuilder promptBuilder) {
         this.llmClient = llmClient;
         this.redactor = redactor;
         this.optionsResolver = optionsResolver;
         this.auditLogger = auditLogger;
         this.promptSafetyService = promptSafetyService;
         this.retrievalService = retrievalService;
+        this.promptBuilder = promptBuilder;
     }
 
     public Mono<AiAskResponse> ask(AiAskRequest req) {
@@ -93,7 +96,7 @@ public class AiServiceImpl implements AiService {
                             ? retrievalService.retrieve(new RetrievalQuery(safeQuestion, opts.topK()))
                             : Mono.just(List.of());
                     return retrievedMono.flatMap(chunks -> {
-                        String prompt = buildPrompt(safeQuestion, chunks);
+                        String prompt = promptBuilder.build(safeQuestion, chunks);
 
                         long llmStart = System.currentTimeMillis();
                         return llmClient.ask(prompt)
@@ -138,26 +141,5 @@ public class AiServiceImpl implements AiService {
                 });
     }
 
-    private static String buildPrompt(String question, List<RetrievedChunk> chunks) {
-        if (chunks.isEmpty()) {
-            return question;
-        }
 
-        StringBuilder sb = new StringBuilder();
-        sb.append("Use the following internal context to answer the question.\n");
-        sb.append("If context is insufficient, say so explicitly.\n\n");
-        sb.append("Context:\n");
-
-        for (RetrievedChunk c : chunks) {
-            sb.append("- [docId=").append(c.docId())
-                    .append(", chunkId=").append(c.chunkId())
-                    .append(", score=").append(String.format("%.3f", c.score()))
-                    .append("] ")
-                    .append(c.content())
-                    .append("\n");
-        }
-
-        sb.append("\nQuestion:\n").append(question);
-        return sb.toString();
-    }
 }
